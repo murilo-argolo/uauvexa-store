@@ -406,6 +406,10 @@ h1 {
   gap: 18px;
 }
 
+.product-grid.subcategory-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 320px));
+}
+
 .product-card,
 .skeleton-card {
   position: relative;

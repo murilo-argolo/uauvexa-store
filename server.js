@@ -87,13 +87,14 @@ function normalizeProduct(product) {
   const variants = Array.isArray(product.variants) && product.variants.length ? product.variants : [null];
 
   return variants.map((variant) => {
-    const variantLabel = Array.isArray(variant?.values)
-      ? variant.values.map(localized).filter(Boolean).join(" / ")
-      : "";
+    const variantValues = Array.isArray(variant?.values) ? variant.values.map(localized).filter(Boolean) : [];
+    const variantLabel = variantValues.join(" / ");
 
     return {
       id: variant ? `${product.id}-${variant.id}` : String(product.id),
       name: variantLabel ? `${name} — ${variantLabel}` : name,
+      baseName: name,
+      color: variantValues[0] || "",
       category,
       price: Number(variant?.price || 0),
       stock: Number(variant?.stock || 0),

@@ -1,7 +1,8 @@
 const state = {
   products: [],
-  view: "families",
-  activeFamily: null
+  view: "top",
+  activeTop: null,
+  activeLine: null
 };
 
 const demoProducts = [
@@ -47,23 +48,26 @@ const demoProducts = [
   }
 ];
 
-const FAMILY_META = {
-  "macacao-triton": { label: "Macacao Triton", category: "Macacoes", tag: "RACE" },
-  "macacao-chicago": { label: "Macacao Chicago", category: "Macacoes", tag: "RACE" },
-  "balaclava": { label: "Balaclava", category: "Balaclavas", tag: "DRY" },
-  "macacao-personalizado": { label: "Macacao Personalizado", category: "Personalizados", tag: "RACE" },
-  "kit-balaclava": { label: "Kit de Balaclava", category: "Balaclavas", tag: "DRY" },
-  "outros": { label: "Outros Personalizados", category: "Personalizados", tag: "RACE" }
+const LINE_META = {
+  "macacao-triton": { label: "Tecido Triton", category: "Macacoes", tag: "RACE", topKey: "macacao" },
+  "macacao-chicago": { label: "Tecido Chicago", category: "Macacoes", tag: "RACE", topKey: "macacao" },
+  balaclava: { label: "Balaclava", category: "Balaclavas", tag: "DRY", topKey: "balaclava" },
+  "kit-balaclava": { label: "Kit de Balaclava", category: "Balaclavas", tag: "DRY", topKey: "kit-balaclava" },
+  "macacao-personalizado": { label: "Macacao Personalizado", category: "Personalizados", tag: "RACE", topKey: "macacao-personalizado" },
+  outros: { label: "Outros Personalizados", category: "Personalizados", tag: "RACE", topKey: "outros" }
 };
 
-const FAMILY_ORDER = [
-  "macacao-triton",
-  "macacao-chicago",
-  "balaclava",
-  "macacao-personalizado",
-  "kit-balaclava",
-  "outros"
-];
+const TOP_META = {
+  macacao: { label: "Macacao", category: "Macacoes", tag: "RACE", hasSub: true },
+  balaclava: { label: "Balaclava", category: "Balaclavas", tag: "DRY", hasSub: false },
+  "kit-balaclava": { label: "Kit de Balaclava", category: "Balaclavas", tag: "DRY", hasSub: false },
+  "macacao-personalizado": { label: "Macacao Personalizado", category: "Personalizados", tag: "RACE", hasSub: false },
+  outros: { label: "Outros Personalizados", category: "Personalizados", tag: "RACE", hasSub: false }
+};
+
+const TOP_ORDER = ["macacao", "balaclava", "macacao-personalizado", "kit-balaclava", "outros"];
+
+const COLLAPSE_BY_COLOR = new Set(["macacao-triton", "macacao-chicago"]);
 
 const productsEl = document.querySelector("[data-products]");
 
@@ -72,6 +76,10 @@ function money(value) {
     style: "currency",
     currency: "BRL"
   });
+}
+
+function optionsLabel(count) {
+  return count === 1 ? "1 opcao" : `${count} opcoes`;
 }
 
 function familyOf(product) {
@@ -105,41 +113,83 @@ function pickCover(items) {
   return withImage ? withImage.image : "";
 }
 
-function computeFamilies(products) {
+function collapseByColor(items) {
   const groups = new Map();
-  products.forEach((product) => {
-    const key = familyOf(product);
+  items.forEach((item) => {
+    const key = item.color || item.name;
     if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(product);
+    groups.get(key).push(item);
   });
 
-  return FAMILY_ORDER
-    .filter((key) => groups.has(key))
-    .map((key) => {
-      const items = groups.get(key).slice().sort((a, b) => a.price - b.price);
-      const meta = FAMILY_META[key];
+  return Array.from(groups.values()).map((variants) => {
+    const cheapest = variants.slice().sort((a, b) => a.price - b.price)[0];
+    const withImage = variants.find((variant) => variant.image) || cheapest;
+    const totalStock = variants.reduce((sum, variant) => sum + variant.stock, 0);
+    const color = variants[0].color;
+
+    return {
+      id: `${cheapest.id}-color`,
+      name: color ? `${cheapest.baseName || cheapest.name} — ${color}` : cheapest.name,
+      category: cheapest.category,
+      price: cheapest.price,
+      stock: totalStock,
+      image: withImage.image,
+      url: cheapest.url,
+      tag: cheapest.tag
+    };
+  });
+}
+
+function computeCatalog(products) {
+  const lineGroups = new Map();
+  products.forEach((product) => {
+    const line = familyOf(product);
+    if (!lineGroups.has(line)) lineGroups.set(line, []);
+    lineGroups.get(line).push(product);
+  });
+
+  const topFamilies = TOP_ORDER
+    .map((topKey) => {
+      const topMeta = TOP_META[topKey];
+      const lineKeys = Object.keys(LINE_META).filter((line) => LINE_META[line].topKey === topKey && lineGroups.has(line));
+      if (!lineKeys.length) return null;
+
+      const allItems = lineKeys.flatMap((line) => lineGroups.get(line));
+      const showSub = topMeta.hasSub && lineKeys.length > 1;
+
       return {
-        key,
-        label: meta.label,
-        category: meta.category,
-        tag: meta.tag,
-        items,
-        minPrice: Math.min(...items.map((product) => product.price)),
-        cover: pickCover(items)
+        key: topKey,
+        label: topMeta.label,
+        category: topMeta.category,
+        tag: topMeta.tag,
+        items: allItems,
+        lineKeys,
+        minPrice: Math.min(...allItems.map((product) => product.price)),
+        cover: pickCover(allItems),
+        subcategories: showSub
+          ? lineKeys.map((line) => {
+              const items = lineGroups.get(line);
+              return {
+                key: line,
+                label: LINE_META[line].label,
+                category: LINE_META[line].category,
+                tag: LINE_META[line].tag,
+                items,
+                minPrice: Math.min(...items.map((product) => product.price)),
+                cover: pickCover(items)
+              };
+            })
+          : null
       };
-    });
+    })
+    .filter(Boolean);
+
+  return { topFamilies, lineGroups };
 }
 
-function optionsLabel(count) {
-  return count === 1 ? "1 opcao" : `${count} opcoes`;
-}
-
-function renderFamilies() {
-  const families = computeFamilies(state.products);
-
-  productsEl.className = "product-grid";
-  productsEl.innerHTML = families.map((family) => `
-    <button type="button" class="product-card family-card" data-family="${family.key}">
+function familyCardHtml(family, dataAttr) {
+  return `
+    <button type="button" class="product-card family-card" data-${dataAttr}="${family.key}">
       <span class="product-media">
         <span class="product-tag">${optionsLabel(family.items.length)}</span>
         ${family.cover ? `<img src="${family.cover}" alt="${family.label}">` : `<span class="product-silhouette">${family.tag}</span>`}
@@ -153,32 +203,71 @@ function renderFamilies() {
         </span>
       </span>
     </button>
-  `).join("");
+  `;
 }
 
-function renderFamilyDetail(familyKey) {
-  const families = computeFamilies(state.products);
-  const family = families.find((item) => item.key === familyKey);
+function renderTop() {
+  const { topFamilies } = computeCatalog(state.products);
+  productsEl.className = "product-grid";
+  productsEl.innerHTML = topFamilies.map((family) => familyCardHtml(family, "top")).join("");
+}
 
-  if (!family) {
-    state.view = "families";
-    state.activeFamily = null;
-    renderFamilies();
+function renderSub(topKey) {
+  const { topFamilies } = computeCatalog(state.products);
+  const family = topFamilies.find((item) => item.key === topKey);
+
+  if (!family || !family.subcategories) {
+    state.view = "top";
+    state.activeTop = null;
+    renderTop();
     return;
   }
 
   productsEl.className = "product-list";
   productsEl.innerHTML = `
     <div class="family-detail-head">
-      <button class="family-back" type="button" data-back>&larr; Voltar pra vitrine</button>
+      <button class="family-back" type="button" data-back-top>&larr; Voltar pra vitrine</button>
       <span class="product-category">${family.category}</span>
       <h3>${family.label}</h3>
-      <p>${optionsLabel(family.items.length)} ${family.items.length === 1 ? "disponivel" : "disponiveis"} — escolha a que combina com voce.</p>
+      <p>Escolha o tecido.</p>
     </div>
-    ${family.items.map((product) => `
+    <div class="product-grid subcategory-grid">
+      ${family.subcategories.map((sub) => familyCardHtml(sub, "line")).join("")}
+    </div>
+  `;
+}
+
+function renderList(lineKey) {
+  const { lineGroups } = computeCatalog(state.products);
+  const meta = LINE_META[lineKey];
+  const rawItems = lineGroups.get(lineKey);
+
+  if (!meta || !rawItems || !rawItems.length) {
+    state.view = "top";
+    state.activeTop = null;
+    state.activeLine = null;
+    renderTop();
+    return;
+  }
+
+  const items = (COLLAPSE_BY_COLOR.has(lineKey) ? collapseByColor(rawItems) : rawItems)
+    .slice()
+    .sort((a, b) => a.price - b.price);
+
+  const cameFromSub = TOP_META[meta.topKey]?.hasSub;
+
+  productsEl.className = "product-list";
+  productsEl.innerHTML = `
+    <div class="family-detail-head">
+      <button class="family-back" type="button" ${cameFromSub ? "data-back-sub" : "data-back-top"}>&larr; Voltar</button>
+      <span class="product-category">${meta.category}</span>
+      <h3>${meta.label}</h3>
+      <p>${optionsLabel(items.length)} ${items.length === 1 ? "disponivel" : "disponiveis"} — escolha a que combina com voce.</p>
+    </div>
+    ${items.map((product) => `
       <article class="product-row">
         <a class="product-row-media" href="${product.url}" target="_blank" rel="noreferrer">
-          ${product.image ? `<img src="${product.image}" alt="${product.name}">` : `<span class="product-silhouette">${family.tag}</span>`}
+          ${product.image ? `<img src="${product.image}" alt="${product.name}">` : `<span class="product-silhouette">${meta.tag}</span>`}
         </a>
         <div class="product-row-info">
           <h3>${product.name}</h3>
@@ -194,10 +283,13 @@ function renderFamilyDetail(familyKey) {
 }
 
 function renderProducts() {
-  if (state.view === "family" && state.activeFamily) {
-    renderFamilyDetail(state.activeFamily);
+  if (state.view === "sub" && state.activeTop) {
+    renderSub(state.activeTop);
+  } else if (state.view === "list" && state.activeLine) {
+    renderList(state.activeLine);
   } else {
-    renderFamilies();
+    state.view = "top";
+    renderTop();
   }
 }
 
@@ -217,17 +309,44 @@ async function loadProducts() {
 }
 
 document.addEventListener("click", (event) => {
-  const familyCard = event.target.closest("[data-family]");
-  if (familyCard) {
-    state.view = "family";
-    state.activeFamily = familyCard.dataset.family;
+  const topCard = event.target.closest("[data-top]");
+  if (topCard) {
+    const topKey = topCard.dataset.top;
+    const { topFamilies } = computeCatalog(state.products);
+    const family = topFamilies.find((item) => item.key === topKey);
+
+    if (family) {
+      state.activeTop = topKey;
+      if (family.subcategories) {
+        state.view = "sub";
+        state.activeLine = null;
+      } else {
+        state.view = "list";
+        state.activeLine = family.lineKeys[0];
+      }
+      renderProducts();
+    }
+  }
+
+  const lineCard = event.target.closest("[data-line]");
+  if (lineCard) {
+    state.view = "list";
+    state.activeLine = lineCard.dataset.line;
     renderProducts();
   }
 
-  const backButton = event.target.closest("[data-back]");
-  if (backButton) {
-    state.view = "families";
-    state.activeFamily = null;
+  const backTop = event.target.closest("[data-back-top]");
+  if (backTop) {
+    state.view = "top";
+    state.activeTop = null;
+    state.activeLine = null;
+    renderProducts();
+  }
+
+  const backSub = event.target.closest("[data-back-sub]");
+  if (backSub) {
+    state.view = "sub";
+    state.activeLine = null;
     renderProducts();
   }
 
