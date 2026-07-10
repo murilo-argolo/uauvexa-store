@@ -175,40 +175,7 @@ button {
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.74;
-  background:
-    radial-gradient(circle at 76% 42%, rgba(215, 255, 0, 0.18), transparent 18%),
-    linear-gradient(115deg, transparent 0 54%, rgba(215, 255, 0, 0.86) 54% 54.6%, transparent 54.6%),
-    linear-gradient(115deg, transparent 0 59%, rgba(18, 109, 255, 0.9) 59% 59.8%, transparent 59.8%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 8%, transparent 8% 16%, rgba(255, 255, 255, 0.08) 16% 24%, transparent 24% 100%),
-    radial-gradient(circle at 78% 54%, rgba(255, 255, 255, 0.72) 0 8%, transparent 8.4%),
-    linear-gradient(180deg, #101a20, #03090c);
-}
-
-.hero-media::before,
-.hero-media::after {
-  content: "";
-  position: absolute;
-  right: 9%;
-  bottom: 14%;
-  width: min(420px, 44vw);
-  aspect-ratio: 0.72;
-  border: 8px solid rgba(255, 255, 255, 0.9);
-  border-top-width: 18px;
-  border-radius: 38% 38% 18% 18%;
-  transform: skewX(-7deg) rotate(3deg);
-  box-shadow: inset 0 0 0 10px rgba(215, 255, 0, 0.52), 0 28px 90px rgba(0, 0, 0, 0.48);
-}
-
-.hero-media::after {
-  right: 31%;
-  bottom: 19%;
-  width: min(160px, 18vw);
-  aspect-ratio: 0.62;
-  border-width: 6px;
-  border-top-width: 13px;
-  transform: skewX(-11deg) rotate(-8deg);
-  opacity: 0.86;
+  background: url("assets/hero-kart-azul.jpg") center 30% / cover no-repeat, #03090c;
 }
 
 .hero::after {
@@ -216,8 +183,8 @@ button {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(3, 9, 12, 0.96), rgba(3, 9, 12, 0.62) 46%, rgba(3, 9, 12, 0.08)),
-    linear-gradient(0deg, rgba(3, 9, 12, 0.74), transparent 38%);
+    linear-gradient(90deg, rgba(3, 9, 12, 0.97), rgba(3, 9, 12, 0.72) 42%, rgba(3, 9, 12, 0.22) 68%, rgba(3, 9, 12, 0.4)),
+    linear-gradient(0deg, rgba(3, 9, 12, 0.85), transparent 40%);
 }
 
 .speed-lines {
@@ -777,7 +744,7 @@ h1 {
   }
 
   .hero-media {
-    object-position: center top;
+    background-position: 68% 12%;
   }
 
   .hero-content {
