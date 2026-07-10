@@ -160,6 +160,16 @@ document.addEventListener("click", (event) => {
     const firstItem = state.cart[0];
     window.open(firstItem?.url || "https://uauvexa.com.br/produtos/", "_blank", "noopener");
   }
+
+  const navToggle = event.target.closest("[data-nav-toggle]");
+  const nav = document.querySelector("[data-nav]");
+  if (navToggle && nav) {
+    const isOpen = nav.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", String(isOpen));
+  } else if (nav && nav.classList.contains("open") && event.target.closest("[data-nav] a")) {
+    nav.classList.remove("open");
+    navToggle?.setAttribute("aria-expanded", "false");
+  }
 });
 
 loadProducts();
