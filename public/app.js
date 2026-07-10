@@ -140,6 +140,10 @@ function collapseByColor(items) {
   });
 }
 
+function optionCountFor(line, items) {
+  return COLLAPSE_BY_COLOR.has(line) ? collapseByColor(items).length : items.length;
+}
+
 function computeCatalog(products) {
   const lineGroups = new Map();
   products.forEach((product) => {
@@ -175,6 +179,7 @@ function computeCatalog(products) {
                 category: LINE_META[line].category,
                 tag: LINE_META[line].tag,
                 items,
+                optionCount: optionCountFor(line, items),
                 minPrice: Math.min(...items.map((product) => product.price)),
                 cover: pickCover(items)
               };
@@ -184,6 +189,12 @@ function computeCatalog(products) {
     })
     .filter(Boolean);
 
+  topFamilies.forEach((family) => {
+    family.optionCount = family.subcategories
+      ? family.subcategories.reduce((sum, sub) => sum + sub.optionCount, 0)
+      : optionCountFor(family.lineKeys[0], family.items);
+  });
+
   return { topFamilies, lineGroups };
 }
 
@@ -191,7 +202,7 @@ function familyCardHtml(family, dataAttr) {
   return `
     <button type="button" class="product-card family-card" data-${dataAttr}="${family.key}">
       <span class="product-media">
-        <span class="product-tag">${optionsLabel(family.items.length)}</span>
+        <span class="product-tag">${optionsLabel(family.optionCount)}</span>
         ${family.cover ? `<img src="${family.cover}" alt="${family.label}">` : `<span class="product-silhouette">${family.tag}</span>`}
       </span>
       <span class="product-info">
