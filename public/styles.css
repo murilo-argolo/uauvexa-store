@@ -232,7 +232,7 @@ p {
 h1 {
   max-width: 780px;
   margin-bottom: 18px;
-  font-size: clamp(48px, 9vw, 112px);
+  font-size: clamp(48px, 9vw, 88px);
   line-height: 0.88;
   font-weight: 950;
   text-transform: uppercase;
