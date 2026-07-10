@@ -1,6 +1,7 @@
 const state = {
   products: [],
-  filter: "Todos"
+  view: "families",
+  activeFamily: null
 };
 
 const demoProducts = [
@@ -46,6 +47,24 @@ const demoProducts = [
   }
 ];
 
+const FAMILY_META = {
+  "macacao-triton": { label: "Macacao Triton", category: "Macacoes", tag: "RACE" },
+  "macacao-chicago": { label: "Macacao Chicago", category: "Macacoes", tag: "RACE" },
+  "balaclava": { label: "Balaclava", category: "Balaclavas", tag: "DRY" },
+  "macacao-personalizado": { label: "Macacao Personalizado", category: "Personalizados", tag: "RACE" },
+  "kit-balaclava": { label: "Kit de Balaclava", category: "Balaclavas", tag: "DRY" },
+  "outros": { label: "Outros Personalizados", category: "Personalizados", tag: "RACE" }
+};
+
+const FAMILY_ORDER = [
+  "macacao-triton",
+  "macacao-chicago",
+  "balaclava",
+  "macacao-personalizado",
+  "kit-balaclava",
+  "outros"
+];
+
 const productsEl = document.querySelector("[data-products]");
 
 function money(value) {
@@ -55,30 +74,111 @@ function money(value) {
   });
 }
 
-function filteredProducts() {
-  if (state.filter === "Todos") return state.products;
-  return state.products.filter((product) => product.category === state.filter);
+function familyOf(product) {
+  const n = (product.name || "").toLowerCase();
+  if (n.includes("kit") && n.includes("balaclava")) return "kit-balaclava";
+  if (n.includes("balaclava")) return "balaclava";
+  if (n.includes("triton") && !n.includes("personalizado")) return "macacao-triton";
+  if (n.includes("chicago") && !n.includes("personalizado") && !n.includes("kit")) return "macacao-chicago";
+  if (n.includes("macac") && (n.includes("personalizado") || n.includes("kit"))) return "macacao-personalizado";
+  return "outros";
 }
 
-function renderProducts() {
-  const products = filteredProducts();
+function computeFamilies(products) {
+  const groups = new Map();
+  products.forEach((product) => {
+    const key = familyOf(product);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(product);
+  });
 
-  productsEl.innerHTML = products.map((product) => `
-    <article class="product-card">
-      <a class="product-media" href="${product.url}" target="_blank" rel="noreferrer">
-        <span class="product-tag">${product.tag || "UAUVEXA"}</span>
-        ${product.image ? `<img src="${product.image}" alt="${product.name}">` : `<span class="product-silhouette">${product.category === "Balaclavas" ? "DRY" : "RACE"}</span>`}
-      </a>
-      <div class="product-info">
-        <span class="product-category">${product.category}</span>
-        <h3>${product.name}</h3>
-        <div class="product-bottom">
+  return FAMILY_ORDER
+    .filter((key) => groups.has(key))
+    .map((key) => {
+      const items = groups.get(key).slice().sort((a, b) => a.price - b.price);
+      const meta = FAMILY_META[key];
+      const withImage = items.find((product) => product.image);
+      return {
+        key,
+        label: meta.label,
+        category: meta.category,
+        tag: meta.tag,
+        items,
+        minPrice: Math.min(...items.map((product) => product.price)),
+        cover: withImage ? withImage.image : ""
+      };
+    });
+}
+
+function optionsLabel(count) {
+  return count === 1 ? "1 opcao" : `${count} opcoes`;
+}
+
+function renderFamilies() {
+  const families = computeFamilies(state.products);
+
+  productsEl.className = "product-grid";
+  productsEl.innerHTML = families.map((family) => `
+    <button type="button" class="product-card family-card" data-family="${family.key}">
+      <span class="product-media">
+        <span class="product-tag">${optionsLabel(family.items.length)}</span>
+        ${family.cover ? `<img src="${family.cover}" alt="${family.label}">` : `<span class="product-silhouette">${family.tag}</span>`}
+      </span>
+      <span class="product-info">
+        <span class="product-category">${family.category}</span>
+        <span class="family-title">${family.label}</span>
+        <span class="product-bottom">
+          <strong class="price">A partir de ${money(family.minPrice)}</strong>
+          <span class="add-button">Ver opcoes</span>
+        </span>
+      </span>
+    </button>
+  `).join("");
+}
+
+function renderFamilyDetail(familyKey) {
+  const families = computeFamilies(state.products);
+  const family = families.find((item) => item.key === familyKey);
+
+  if (!family) {
+    state.view = "families";
+    state.activeFamily = null;
+    renderFamilies();
+    return;
+  }
+
+  productsEl.className = "product-list";
+  productsEl.innerHTML = `
+    <div class="family-detail-head">
+      <button class="family-back" type="button" data-back>&larr; Voltar pra vitrine</button>
+      <span class="product-category">${family.category}</span>
+      <h3>${family.label}</h3>
+      <p>${optionsLabel(family.items.length)} disponiveis — escolha a que combina com voce.</p>
+    </div>
+    ${family.items.map((product) => `
+      <article class="product-row">
+        <a class="product-row-media" href="${product.url}" target="_blank" rel="noreferrer">
+          ${product.image ? `<img src="${product.image}" alt="${product.name}">` : `<span class="product-silhouette">${family.tag}</span>`}
+        </a>
+        <div class="product-row-info">
+          <h3>${product.name}</h3>
+          <span class="product-category">${product.category}</span>
+        </div>
+        <div class="product-row-bottom">
           <strong class="price">${money(product.price)}</strong>
           <a class="add-button" href="${product.url}" target="_blank" rel="noreferrer">Comprar</a>
         </div>
-      </div>
-    </article>
-  `).join("");
+      </article>
+    `).join("")}
+  `;
+}
+
+function renderProducts() {
+  if (state.view === "family" && state.activeFamily) {
+    renderFamilyDetail(state.activeFamily);
+  } else {
+    renderFamilies();
+  }
 }
 
 async function loadProducts() {
@@ -97,12 +197,17 @@ async function loadProducts() {
 }
 
 document.addEventListener("click", (event) => {
-  const filterButton = event.target.closest("[data-filter]");
-  if (filterButton) {
-    state.filter = filterButton.dataset.filter;
-    document.querySelectorAll("[data-filter]").forEach((button) => {
-      button.classList.toggle("active", button === filterButton);
-    });
+  const familyCard = event.target.closest("[data-family]");
+  if (familyCard) {
+    state.view = "family";
+    state.activeFamily = familyCard.dataset.family;
+    renderProducts();
+  }
+
+  const backButton = event.target.closest("[data-back]");
+  if (backButton) {
+    state.view = "families";
+    state.activeFamily = null;
     renderProducts();
   }
 
