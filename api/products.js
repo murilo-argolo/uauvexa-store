@@ -41,25 +41,40 @@ const demoProducts = [
   }
 ];
 
+function localized(field) {
+  return field?.pt || field?.en || field?.es || "";
+}
+
 function normalizeProduct(product) {
-  const name = product.name?.pt || product.name?.en || product.name?.es || "Produto UAUVEXA";
-  const variant = Array.isArray(product.variants) ? product.variants[0] : null;
-  const image = Array.isArray(product.images) && product.images[0] ? product.images[0].src : "";
-  const handle = product.handle?.pt || product.handle?.en || product.handle?.es || "";
+  const name = localized(product.name) || "Produto UAUVEXA";
+  const handle = localized(product.handle);
+  const url = handle ? `https://uauvexa.lojavirtualnuvem.com.br/produtos/${handle}/` : "https://uauvexa.lojavirtualnuvem.com.br/produtos/";
   const category = Array.isArray(product.categories) && product.categories[0]?.name
-    ? product.categories[0].name.pt || product.categories[0].name.en || product.categories[0].name.es || "Produtos"
+    ? localized(product.categories[0].name) || "Produtos"
     : "Produtos";
 
-  return {
-    id: String(product.id),
-    name,
-    category,
-    price: Number(variant?.price || 0),
-    stock: Number(variant?.stock || 0),
-    image,
-    url: handle ? `https://uauvexa.lojavirtualnuvem.com.br/produtos/${handle}/` : "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
-    tag: product.brand || "UAUVEXA"
-  };
+  const images = Array.isArray(product.images) ? product.images : [];
+  const imageById = new Map(images.map((image) => [image.id, image.src]));
+  const fallbackImage = images[0]?.src || "";
+
+  const variants = Array.isArray(product.variants) && product.variants.length ? product.variants : [null];
+
+  return variants.map((variant) => {
+    const variantLabel = Array.isArray(variant?.values)
+      ? variant.values.map(localized).filter(Boolean).join(" / ")
+      : "";
+
+    return {
+      id: variant ? `${product.id}-${variant.id}` : String(product.id),
+      name: variantLabel ? `${name} — ${variantLabel}` : name,
+      category,
+      price: Number(variant?.price || 0),
+      stock: Number(variant?.stock || 0),
+      image: (variant && imageById.get(variant.image_id)) || fallbackImage,
+      url,
+      tag: product.brand || "UAUVEXA"
+    };
+  });
 }
 
 module.exports = async function handler(req, res) {
@@ -87,7 +102,7 @@ module.exports = async function handler(req, res) {
     }
 
     const products = await response.json();
-    res.status(200).json({ mode: "nuvemshop", products: products.map(normalizeProduct) });
+    res.status(200).json({ mode: "nuvemshop", products: products.flatMap(normalizeProduct) });
   } catch (error) {
     res.status(200).json({ mode: "demo", warning: error.message, products: demoProducts });
   }

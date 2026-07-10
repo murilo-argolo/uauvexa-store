@@ -153,7 +153,7 @@ function renderFamilyDetail(familyKey) {
       <button class="family-back" type="button" data-back>&larr; Voltar pra vitrine</button>
       <span class="product-category">${family.category}</span>
       <h3>${family.label}</h3>
-      <p>${optionsLabel(family.items.length)} disponiveis — escolha a que combina com voce.</p>
+      <p>${optionsLabel(family.items.length)} ${family.items.length === 1 ? "disponivel" : "disponiveis"} — escolha a que combina com voce.</p>
     </div>
     ${family.items.map((product) => `
       <article class="product-row">
