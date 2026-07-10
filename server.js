@@ -25,7 +25,7 @@ const demoProducts = [
     price: 950,
     stock: 5,
     image: "",
-    url: "https://uauvexa.com.br/produtos/macacao-de-kart-kac-tecido-triton-uauvexa/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/macacao-de-kart-kac-tecido-triton-uauvexa/",
     tag: "Personalizado"
   },
   {
@@ -35,7 +35,7 @@ const demoProducts = [
     price: 1698,
     stock: 5,
     image: "",
-    url: "https://uauvexa.com.br/produtos/kit-2-macacoes-chicago-personalizado-compre-2-e-pague-r849-cada/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/kit-2-macacoes-chicago-personalizado-compre-2-e-pague-r849-cada/",
     tag: "Compre 2"
   },
   {
@@ -45,7 +45,7 @@ const demoProducts = [
     price: 59,
     stock: 14,
     image: "",
-    url: "https://uauvexa.com.br/produtos/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
     tag: "Leve"
   },
   {
@@ -55,7 +55,7 @@ const demoProducts = [
     price: 59,
     stock: 12,
     image: "",
-    url: "https://uauvexa.com.br/produtos/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
     tag: "Dry"
   }
 ];
@@ -84,7 +84,7 @@ function normalizeProduct(product) {
     price: Number(variant?.price || 0),
     stock: Number(variant?.stock || 0),
     image,
-    url: handle ? `https://uauvexa.com.br/produtos/${handle}/` : "https://uauvexa.com.br/produtos/",
+    url: handle ? `https://uauvexa.lojavirtualnuvem.com.br/produtos/${handle}/` : "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
     tag: product.brand || "UAUVEXA"
   };
 }

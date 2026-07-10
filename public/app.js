@@ -1,7 +1,6 @@
 const state = {
   products: [],
-  filter: "Todos",
-  cart: []
+  filter: "Todos"
 };
 
 const demoProducts = [
@@ -12,7 +11,7 @@ const demoProducts = [
     price: 950,
     stock: 5,
     image: "",
-    url: "https://uauvexa.com.br/produtos/macacao-de-kart-kac-tecido-triton-uauvexa/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/macacao-de-kart-kac-tecido-triton-uauvexa/",
     tag: "Personalizado"
   },
   {
@@ -22,7 +21,7 @@ const demoProducts = [
     price: 1698,
     stock: 5,
     image: "",
-    url: "https://uauvexa.com.br/produtos/kit-2-macacoes-chicago-personalizado-compre-2-e-pague-r849-cada/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/kit-2-macacoes-chicago-personalizado-compre-2-e-pague-r849-cada/",
     tag: "Compre 2"
   },
   {
@@ -32,7 +31,7 @@ const demoProducts = [
     price: 59,
     stock: 14,
     image: "",
-    url: "https://uauvexa.com.br/produtos/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
     tag: "Dry"
   },
   {
@@ -42,16 +41,12 @@ const demoProducts = [
     price: 59,
     stock: 12,
     image: "",
-    url: "https://uauvexa.com.br/produtos/",
+    url: "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
     tag: "Leve"
   }
 ];
 
 const productsEl = document.querySelector("[data-products]");
-const cartDrawer = document.querySelector("[data-cart-drawer]");
-const cartItemsEl = document.querySelector("[data-cart-items]");
-const cartCountEl = document.querySelector("[data-cart-count]");
-const cartTotalEl = document.querySelector("[data-cart-total]");
 
 function money(value) {
   return Number(value || 0).toLocaleString("pt-BR", {
@@ -79,41 +74,11 @@ function renderProducts() {
         <h3>${product.name}</h3>
         <div class="product-bottom">
           <strong class="price">${money(product.price)}</strong>
-          <button class="add-button" type="button" data-add="${product.id}">Comprar</button>
+          <a class="add-button" href="${product.url}" target="_blank" rel="noreferrer">Comprar</a>
         </div>
       </div>
     </article>
   `).join("");
-}
-
-function renderCart() {
-  cartCountEl.textContent = state.cart.length;
-  const total = state.cart.reduce((sum, product) => sum + Number(product.price || 0), 0);
-  cartTotalEl.textContent = money(total);
-
-  if (!state.cart.length) {
-    cartItemsEl.innerHTML = "<p class=\"cart-note\">Sua sacola esta vazia.</p>";
-    return;
-  }
-
-  cartItemsEl.innerHTML = state.cart.map((product) => `
-    <div class="cart-item">
-      ${product.image ? `<img src="${product.image}" alt="${product.name}">` : `<span class="cart-thumb">${product.category === "Balaclavas" ? "DRY" : "RACE"}</span>`}
-      <div>
-        <strong>${product.name}</strong>
-        <p class="cart-note">${money(product.price)}</p>
-      </div>
-    </div>
-  `).join("");
-}
-
-function addToCart(productId) {
-  const product = state.products.find((item) => item.id === productId);
-  if (!product) return;
-  state.cart.push(product);
-  renderCart();
-  cartDrawer.classList.add("open");
-  cartDrawer.setAttribute("aria-hidden", "false");
 }
 
 async function loadProducts() {
@@ -141,26 +106,6 @@ document.addEventListener("click", (event) => {
     renderProducts();
   }
 
-  const addButton = event.target.closest("[data-add]");
-  if (addButton) {
-    addToCart(addButton.dataset.add);
-  }
-
-  if (event.target.closest("[data-open-cart]")) {
-    cartDrawer.classList.add("open");
-    cartDrawer.setAttribute("aria-hidden", "false");
-  }
-
-  if (event.target.closest("[data-close-cart]") || event.target === cartDrawer) {
-    cartDrawer.classList.remove("open");
-    cartDrawer.setAttribute("aria-hidden", "true");
-  }
-
-  if (event.target.closest("[data-checkout]")) {
-    const firstItem = state.cart[0];
-    window.open(firstItem?.url || "https://uauvexa.com.br/produtos/", "_blank", "noopener");
-  }
-
   const navToggle = event.target.closest("[data-nav-toggle]");
   const nav = document.querySelector("[data-nav]");
   if (navToggle && nav) {
@@ -173,4 +118,3 @@ document.addEventListener("click", (event) => {
 });
 
 loadProducts();
-renderCart();
