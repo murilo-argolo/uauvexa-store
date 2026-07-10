@@ -84,6 +84,27 @@ function familyOf(product) {
   return "outros";
 }
 
+function pickCover(items) {
+  const stockByImage = new Map();
+  items.forEach((product) => {
+    if (!product.image) return;
+    stockByImage.set(product.image, (stockByImage.get(product.image) || 0) + product.stock);
+  });
+
+  let bestImage = "";
+  let bestStock = -1;
+  stockByImage.forEach((stock, image) => {
+    if (stock > bestStock) {
+      bestStock = stock;
+      bestImage = image;
+    }
+  });
+
+  if (bestImage) return bestImage;
+  const withImage = items.find((product) => product.image);
+  return withImage ? withImage.image : "";
+}
+
 function computeFamilies(products) {
   const groups = new Map();
   products.forEach((product) => {
@@ -97,7 +118,6 @@ function computeFamilies(products) {
     .map((key) => {
       const items = groups.get(key).slice().sort((a, b) => a.price - b.price);
       const meta = FAMILY_META[key];
-      const withImage = items.find((product) => product.image);
       return {
         key,
         label: meta.label,
@@ -105,7 +125,7 @@ function computeFamilies(products) {
         tag: meta.tag,
         items,
         minPrice: Math.min(...items.map((product) => product.price)),
-        cover: withImage ? withImage.image : ""
+        cover: pickCover(items)
       };
     });
 }
