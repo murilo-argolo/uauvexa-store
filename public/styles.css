@@ -362,9 +362,22 @@ h1 {
 .section-heading {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 430px);
+  grid-template-areas: "eyebrow desc" "heading desc";
   gap: 28px;
   align-items: end;
   margin-bottom: 24px;
+}
+
+.section-heading .eyebrow {
+  grid-area: eyebrow;
+}
+
+.section-heading h2 {
+  grid-area: heading;
+}
+
+.section-heading > p:not(.eyebrow) {
+  grid-area: desc;
 }
 
 .section-heading h2,
@@ -942,6 +955,10 @@ h1 {
   .fit-section,
   .site-footer {
     grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    grid-template-areas: "eyebrow" "heading" "desc";
   }
 
   .trust-strip {
