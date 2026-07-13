@@ -917,13 +917,13 @@ h1 {
   }
 
   .hero {
-    min-height: 690px;
+    min-height: 560px;
   }
 
   .hero::after {
     background:
-      linear-gradient(180deg, rgba(3, 9, 12, 0.18), rgba(3, 9, 12, 0.94) 58%),
-      linear-gradient(90deg, rgba(3, 9, 12, 0.68), transparent);
+      linear-gradient(180deg, rgba(3, 9, 12, 0.05), rgba(3, 9, 12, 0.94) 72%),
+      linear-gradient(90deg, rgba(3, 9, 12, 0.5), transparent);
   }
 
   .hero-media {
@@ -938,12 +938,14 @@ h1 {
     font-size: clamp(32px, 10vw, 68px);
   }
 
-  .hero-copy {
-    font-size: 16px;
+  .hero-copy,
+  .race-metrics {
+    display: none;
   }
 
   .hero-actions {
     flex-direction: column;
+    margin-top: 20px;
   }
 
   .primary-action,
@@ -951,8 +953,13 @@ h1 {
     width: 100%;
   }
 
-  .race-metrics {
-    grid-template-columns: 1fr;
+  .secondary-action {
+    min-height: 42px;
+    background: transparent;
+    border-color: transparent;
+    color: rgba(255, 255, 255, 0.68);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .trust-strip,
