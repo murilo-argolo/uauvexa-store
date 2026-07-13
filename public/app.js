@@ -65,7 +65,8 @@ const TOP_META = {
   outros: { label: "Outros Personalizados", category: "Personalizados", tag: "RACE", hasSub: false }
 };
 
-const TOP_ORDER = ["macacao", "balaclava", "macacao-personalizado", "kit-balaclava", "outros"];
+// "outros" hidden from the catalog for now: family has no product photo yet.
+const TOP_ORDER = ["macacao", "balaclava", "macacao-personalizado", "kit-balaclava"];
 
 const COLLAPSE_BY_COLOR = new Set(["macacao-triton", "macacao-chicago"]);
 
