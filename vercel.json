@@ -7,8 +7,28 @@
   ],
   "redirects": [
     {
-      "source": "/produtos/:path*",
-      "destination": "https://uauvexa.lojavirtualnuvem.com.br/produtos/:path*",
+      "source": "/produtos",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
+      "permanent": false
+    },
+    {
+      "source": "/produtos/",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/produtos/",
+      "permanent": false
+    },
+    {
+      "source": "/produtos/:path+",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/produtos/:path+",
+      "permanent": false
+    },
+    {
+      "source": "/:category(macacao|balaclavas|luvas|sapatilhas|protetor-de-costelas|camisas-personalizadas|macacoes|personalizados)",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/:category/",
+      "permanent": false
+    },
+    {
+      "source": "/:category(macacao|balaclavas|luvas|sapatilhas|protetor-de-costelas|camisas-personalizadas|macacoes|personalizados)/",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/:category/",
       "permanent": false
     }
   ]
