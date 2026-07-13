@@ -4,5 +4,12 @@
       "source": "/api/products",
       "destination": "/api/products.js"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/produtos/:path*",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/produtos/:path*",
+      "permanent": false
+    }
   ]
 }
