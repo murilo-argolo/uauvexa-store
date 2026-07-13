@@ -22,12 +22,22 @@
       "permanent": false
     },
     {
-      "source": "/:category(macacao|balaclavas|luvas|sapatilhas|protetor-de-costelas|camisas-personalizadas|macacoes|personalizados)",
+      "source": "/macacao",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/macacoes/",
+      "permanent": false
+    },
+    {
+      "source": "/macacao/",
+      "destination": "https://uauvexa.lojavirtualnuvem.com.br/macacoes/",
+      "permanent": false
+    },
+    {
+      "source": "/:category(balaclavas|luvas|sapatilhas|protetor-de-costelas|camisas-personalizadas|macacoes|personalizados)",
       "destination": "https://uauvexa.lojavirtualnuvem.com.br/:category/",
       "permanent": false
     },
     {
-      "source": "/:category(macacao|balaclavas|luvas|sapatilhas|protetor-de-costelas|camisas-personalizadas|macacoes|personalizados)/",
+      "source": "/:category(balaclavas|luvas|sapatilhas|protetor-de-costelas|camisas-personalizadas|macacoes|personalizados)/",
       "destination": "https://uauvexa.lojavirtualnuvem.com.br/:category/",
       "permanent": false
     }
