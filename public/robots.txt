@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://uauvexa.com.br/sitemap.xml
